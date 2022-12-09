@@ -12,3 +12,6 @@ dependencies:
 
 dev_dependencies:
   rexios_lints: ^4.0.0
+
+executables:
+  oie: open_in_editor

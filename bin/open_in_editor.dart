@@ -9,14 +9,13 @@ const help = '''
 Usage:
   oie [editor] [path]
 
-Editor options:
+Supported editors:
   as:  Android Studio
   asp: Android Studio Preview
   xc:  Xcode
   xcb: Xcode-beta
 
-Path is the path to the flutter project folder. If path is not provided, the current directory will be used.
-''';
+Path is the path to the flutter project folder. If path is not provided, the current directory will be used.''';
 
 final magentaPen = AnsiPen()..magenta();
 final greenPen = AnsiPen()..green();
@@ -38,8 +37,9 @@ void main(List<String> arguments) async {
     );
   }
 
-  if (arguments.first == 'help' || arguments.isEmpty) {
+  if (arguments.isEmpty || arguments.first == 'help') {
     print(magentaPen(help));
+    exit(1);
   }
 
   final editorArg = arguments[0];
@@ -54,16 +54,14 @@ void main(List<String> arguments) async {
   final path =
       Directory('$pathArg/example').existsSync() ? '$pathArg/example' : pathArg;
 
-  final projectFilePath = '$path/${editor.projectFilePath}';
-  if (!File(projectFilePath).existsSync()) {
+  final projectEntity = editor.getProjectEntity(path);
+  if (!projectEntity.existsSync()) {
     print(redPen('${editor.projectType} project not found in path: $path'));
     exit(1);
   }
 
-  final result = Process.runSync(
-    'open',
-    [projectFilePath, '-a', editor.application],
-  );
+  final result =
+      Process.runSync('open', [projectEntity.path, '-a', editor.application]);
 
   final resultStdout = result.stdout;
   final resultStderr = result.stderr;
@@ -83,14 +81,14 @@ enum Editor {
   xc,
   xcb;
 
-  String get projectFilePath {
+  FileSystemEntity getProjectEntity(String path) {
     switch (this) {
       case Editor.as:
       case Editor.asp:
-        return 'android/build.gradle';
+        return File('$path/android/build.gradle');
       case Editor.xc:
       case Editor.xcb:
-        return 'ios/Runner.xcworkspace';
+        return Directory('$path/ios/Runner.xcworkspace');
     }
   }
 
