@@ -25,7 +25,7 @@ final redPen = AnsiPen()..red();
 
 void main(List<String> arguments) async {
   if (Platform.isWindows) {
-    print(redPen('This tool is not supported on Windows.'));
+    print(redPen('This tool is not supported on Windows'));
     exit(1);
   }
 
@@ -65,14 +65,14 @@ void main(List<String> arguments) async {
     [projectFilePath, '-a', editor.application],
   );
 
-  final stdout = result.stdout;
-  final stderr = result.stderr;
+  final resultStdout = result.stdout;
+  final resultStderr = result.stderr;
 
-  if (stdout is String && stdout.isNotEmpty) {
-    print(result.stdout);
+  if (resultStdout is String && resultStdout.isNotEmpty) {
+    stdout.write(result.stdout);
   }
-  if (stderr is String && stderr.isNotEmpty) {
-    print(redPen(result.stderr));
+  if (resultStderr is String && resultStderr.isNotEmpty) {
+    stderr.write(redPen(result.stderr));
   }
   exit(result.exitCode);
 }
