@@ -1,7 +1,7 @@
 name: open_in_editor
 description: Quickly open a Flutter project in the requested editor for native code development
 version: 0.1.0
-homepage: https://github.com/Rexios80/open_in_editor.git
+homepage: https://github.com/Rexios80/open_in_editor
 
 environment:
   sdk: ">=2.18.0 <3.0.0"
