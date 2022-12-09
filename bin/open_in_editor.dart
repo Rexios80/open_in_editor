@@ -24,6 +24,7 @@ final redPen = AnsiPen()..red();
 
 void main(List<String> arguments) async {
   if (Platform.isWindows) {
+    // TODO: Is this possible without user configuration?
     print(redPen('This tool is not supported on Windows'));
     exit(1);
   }
@@ -32,7 +33,7 @@ void main(List<String> arguments) async {
   if (newVersion != null) {
     print(
       yellowPen(
-        'There is an update available: $newVersion. Run `dart pub global activate puby` to update.',
+        'There is an update available: $newVersion. Run `dart pub global activate open_in_editor` to update.',
       ),
     );
   }
@@ -51,12 +52,32 @@ void main(List<String> arguments) async {
   }
 
   final pathArg = arguments.length > 1 ? arguments[1] : '.';
+  // Plugin projects should have a flutter project in the example folder
   final path =
       Directory('$pathArg/example').existsSync() ? '$pathArg/example' : pathArg;
 
-  final projectEntity = editor.getProjectEntity(path);
+  final projectError = redPen(
+    '${editor.projectType} project not found in path: $path\nFlutter plugin projects must contain a valid example project',
+  );
+
+  final projectType = editor.projectType;
+  final FileSystemEntity projectEntity;
+  switch (projectType) {
+    case ProjectType.android:
+      // Plugin project root/android/app does not exist
+      // This will happen if a valid example project does not exist
+      if (!Directory('$path/android/app').existsSync()) {
+        print(projectError);
+        exit(1);
+      }
+      projectEntity = File('$path/android/build.gradle');
+      break;
+    case ProjectType.ios:
+      projectEntity = Directory('$path/ios/Runner.xcworkspace');
+      break;
+  }
   if (!projectEntity.existsSync()) {
-    print(redPen('${editor.projectType} project not found in path: $path'));
+    print(projectError);
     exit(1);
   }
 
@@ -81,25 +102,14 @@ enum Editor {
   xc,
   xcb;
 
-  FileSystemEntity getProjectEntity(String path) {
+  ProjectType get projectType {
     switch (this) {
       case Editor.as:
       case Editor.asp:
-        return File('$path/android/build.gradle');
+        return ProjectType.android;
       case Editor.xc:
       case Editor.xcb:
-        return Directory('$path/ios/Runner.xcworkspace');
-    }
-  }
-
-  String get projectType {
-    switch (this) {
-      case Editor.as:
-      case Editor.asp:
-        return 'Android';
-      case Editor.xc:
-      case Editor.xcb:
-        return 'iOS';
+        return ProjectType.ios;
     }
   }
 
@@ -113,6 +123,21 @@ enum Editor {
         return 'Xcode';
       case Editor.xcb:
         return 'Xcode-beta';
+    }
+  }
+}
+
+enum ProjectType {
+  android,
+  ios;
+
+  @override
+  String toString() {
+    switch (this) {
+      case ProjectType.android:
+        return 'Android';
+      case ProjectType.ios:
+        return 'iOS';
     }
   }
 }

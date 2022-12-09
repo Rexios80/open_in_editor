@@ -4,6 +4,12 @@ Quickly open a Flutter project in the requested editor for native code developme
 
 This tool is currently not supported on Windows
 
+## Features
+
+- Correctly open Flutter projects and plugins in Android Studio or Xcode
+- This ensures that code analysis works, facilitating native development
+- Much quicker than opening the project manually
+
 ## Installation
 
 ```console
