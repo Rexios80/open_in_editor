@@ -1,4 +1,4 @@
-Quickly open a Flutter project in the requested editor (Android Studio, Xcode)
+Quickly open a Flutter project in the requested editor for native code development
 
 ## NOTE
 
