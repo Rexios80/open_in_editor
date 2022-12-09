@@ -23,6 +23,7 @@ $ oie [editor] [path]
 ```
 
 Supported editors
+
 | Alias | Editor                 |
 | ----- | ---------------------- |
 | as    | Android Studio         |
