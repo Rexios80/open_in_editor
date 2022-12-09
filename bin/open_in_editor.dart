@@ -25,7 +25,7 @@ final redPen = AnsiPen()..red();
 void main(List<String> arguments) async {
   if (Platform.isWindows) {
     // TODO: Is this possible without user configuration?
-    print(redPen('This tool is not supported on Windows'));
+    print(redPen('This tool is currently not supported on Windows'));
     exit(1);
   }
 
