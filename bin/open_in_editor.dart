@@ -4,39 +4,18 @@ import 'dart:io';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
 
-import 'oie_config.dart';
-
-const defaultNixAliases = {
-  'as': OieAlias(ProjectType.android, 'Android Studio'),
-  'asp': OieAlias(ProjectType.android, 'Android Studio Preview'),
-  'xc': OieAlias(ProjectType.ios, 'Xcode'),
-  'xcb': OieAlias(ProjectType.ios, 'Xcode-beta'),
-};
-
-const defaultWindowsAliases = {
-  'as': OieAlias(
-    ProjectType.android,
-    'C:/Program Files/Android/Android Studio/bin/studio64.exe',
-  ),
-  'asp': OieAlias(
-    ProjectType.android,
-    'C:/Program Files/Android/Android Studio Preview/bin/studio64.exe',
-  ),
-};
-
 const decoder = Utf8Decoder();
 const help = '''
 Usage:
-  oie [alias] [path]
+  oie [editor] [path]
 
-Default aliases:
+Supported editors:
   as:  Android Studio
   asp: Android Studio Preview
   xc:  Xcode
   xcb: Xcode-beta
 
-Path is the path to the flutter project folder. If path is not provided, the current directory will be used.
-Aliases can be configured using the ~/.oie.yaml file. See the README for more information.''';
+Path is the path to the flutter project folder. If path is not provided, the current directory will be used.''';
 
 final magentaPen = AnsiPen()..magenta();
 final greenPen = AnsiPen()..green();
@@ -44,13 +23,10 @@ final yellowPen = AnsiPen()..yellow();
 final redPen = AnsiPen()..red();
 
 void main(List<String> arguments) async {
-  final config = OieConfig.fromYaml();
-
-  final Map<String, OieAlias> aliases;
   if (Platform.isWindows) {
-    aliases = {...defaultWindowsAliases, ...?config?.aliases};
-  } else {
-    aliases = {...defaultNixAliases, ...?config?.aliases};
+    // TODO: Is this possible without user configuration?
+    print(redPen('This tool is currently not supported on Windows'));
+    exit(1);
   }
 
   final newVersion = await PubUpdateChecker.check();
@@ -67,10 +43,10 @@ void main(List<String> arguments) async {
     exit(1);
   }
 
-  final aliasArg = arguments[0];
-  final alias = aliases[aliasArg];
-  if (alias == null) {
-    print(redPen('Invalid alias: $aliasArg'));
+  final editorArg = arguments[0];
+  final editor = Editor.values.asNameMap()[arguments.first];
+  if (editor == null) {
+    print(redPen('Invalid editor option: $editorArg'));
     print(magentaPen(help));
     exit(1);
   }
@@ -81,12 +57,12 @@ void main(List<String> arguments) async {
       Directory('$pathArg/example').existsSync() ? '$pathArg/example' : pathArg;
 
   final projectError = redPen(
-    '${alias.type} project not found in path: $path\nFlutter plugin projects must contain a valid example project',
+    '${editor.projectType} project not found in path: $path\nFlutter plugin projects must contain a valid example project',
   );
 
-  final type = alias.type;
+  final projectType = editor.projectType;
   final FileSystemEntity projectEntity;
-  switch (type) {
+  switch (projectType) {
     case ProjectType.android:
       // Plugin project root/android/app does not exist
       // This will happen if a valid example project does not exist
@@ -105,12 +81,8 @@ void main(List<String> arguments) async {
     exit(1);
   }
 
-  final ProcessResult result;
-  if (Platform.isWindows) {
-    result = Process.runSync(alias.path, [projectEntity.path]);
-  } else {
-    result = Process.runSync('open', [projectEntity.path, '-a', alias.path]);
-  }
+  final result =
+      Process.runSync('open', [projectEntity.path, '-a', editor.application]);
 
   final resultStdout = result.stdout;
   final resultStderr = result.stderr;
@@ -122,4 +94,50 @@ void main(List<String> arguments) async {
     stderr.write(redPen(result.stderr));
   }
   exit(result.exitCode);
+}
+
+enum Editor {
+  as,
+  asp,
+  xc,
+  xcb;
+
+  ProjectType get projectType {
+    switch (this) {
+      case Editor.as:
+      case Editor.asp:
+        return ProjectType.android;
+      case Editor.xc:
+      case Editor.xcb:
+        return ProjectType.ios;
+    }
+  }
+
+  String get application {
+    switch (this) {
+      case Editor.as:
+        return 'Android Studio';
+      case Editor.asp:
+        return 'Android Studio Preview';
+      case Editor.xc:
+        return 'Xcode';
+      case Editor.xcb:
+        return 'Xcode-beta';
+    }
+  }
+}
+
+enum ProjectType {
+  android,
+  ios;
+
+  @override
+  String toString() {
+    switch (this) {
+      case ProjectType.android:
+        return 'Android';
+      case ProjectType.ios:
+        return 'iOS';
+    }
+  }
 }
