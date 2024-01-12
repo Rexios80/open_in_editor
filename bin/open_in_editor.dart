@@ -72,8 +72,30 @@ void main(List<String> arguments) async {
       }
       projectEntity = File('$path/android/build.gradle');
       break;
-    case ProjectType.ios:
-      projectEntity = Directory('$path/ios/Runner.xcworkspace');
+    case ProjectType.apple:
+      final subpathOptions = [
+        if (Directory('$path/ios').existsSync()) 'iOS',
+        if (Directory('$path/macos').existsSync()) 'macOS',
+      ];
+
+      final String subpath;
+      if (subpathOptions.isEmpty) {
+        print(projectError);
+        exit(1);
+      } else if (subpathOptions.length == 1) {
+        subpath = subpathOptions.first;
+      } else {
+        for (var i = 0; i < subpathOptions.length; i++) {
+          final option = subpathOptions[i];
+          print('[${i + 1}]: $option (${option.toLowerCase()})');
+        }
+        stdout.write('Please choose one: ');
+        final choice = await readInt();
+        subpath = subpathOptions[choice - 1];
+      }
+
+      projectEntity =
+          Directory('$path/${subpath.toLowerCase()}/Runner.xcworkspace');
       break;
   }
   if (!projectEntity.existsSync()) {
@@ -96,6 +118,13 @@ void main(List<String> arguments) async {
   exit(result.exitCode);
 }
 
+Future<int> readInt() async {
+  stdin.echoMode = false;
+  stdin.lineMode = false;
+  final input = await stdin.transform(decoder).first;
+  return int.parse(input);
+}
+
 enum Editor {
   as,
   asp,
@@ -109,7 +138,7 @@ enum Editor {
         return ProjectType.android;
       case Editor.xc:
       case Editor.xcb:
-        return ProjectType.ios;
+        return ProjectType.apple;
     }
   }
 
@@ -129,15 +158,15 @@ enum Editor {
 
 enum ProjectType {
   android,
-  ios;
+  apple;
 
   @override
   String toString() {
     switch (this) {
       case ProjectType.android:
         return 'Android';
-      case ProjectType.ios:
-        return 'iOS';
+      case ProjectType.apple:
+        return 'Apple';
     }
   }
 }
