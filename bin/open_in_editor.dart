@@ -71,7 +71,6 @@ void main(List<String> arguments) async {
         exit(1);
       }
       projectEntity = File('$path/android/build.gradle');
-      break;
     case ProjectType.apple:
       final subpathOptions = [
         if (Directory('$path/ios').existsSync()) 'iOS',
@@ -96,7 +95,6 @@ void main(List<String> arguments) async {
 
       projectEntity =
           Directory('$path/${subpath.toLowerCase()}/Runner.xcworkspace');
-      break;
   }
   if (!projectEntity.existsSync()) {
     print(projectError);
