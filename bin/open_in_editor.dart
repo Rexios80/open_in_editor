@@ -117,9 +117,9 @@ void main(List<String> arguments) async {
 }
 
 Future<int> readInt() async {
-  stdin.echoMode = false;
   stdin.lineMode = false;
   final input = await stdin.transform(decoder).first;
+  stdout.writeln();
   return int.parse(input);
 }
 
