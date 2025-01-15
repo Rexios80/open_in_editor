@@ -111,6 +111,7 @@ void main(List<String> arguments) async {
   for (final path in searchPaths) {
     final searchPath = p.join(path, editor.application);
     if (Directory(searchPath).existsSync()) {
+      print(yellowPen('Editor found at path: $searchPath'));
       applicationPath = searchPath;
       break;
     }
