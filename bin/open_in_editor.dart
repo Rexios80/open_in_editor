@@ -18,15 +18,19 @@ Supported editors:
 
 Path is the path to the flutter project folder. If path is not provided, the current directory will be used.''';
 
+const searchPaths = [
+  '~/Applications',
+];
+
 final magentaPen = AnsiPen()..magenta();
 final greenPen = AnsiPen()..green();
 final yellowPen = AnsiPen()..yellow();
 final redPen = AnsiPen()..red();
 
 void main(List<String> arguments) async {
-  if (Platform.isWindows) {
-    // TODO: Is this possible without user configuration?
-    print(redPen('This tool is currently not supported on Windows'));
+  if (!Platform.isMacOS) {
+    // TODO: Are other platforms possible without user configuration?
+    print(redPen('This tool is only suppored on macOS'));
     exit(1);
   }
 
@@ -103,8 +107,23 @@ void main(List<String> arguments) async {
     exit(1);
   }
 
-  final result =
-      Process.runSync('open', [projectEntity.path, '-a', editor.application]);
+  String? applicationPath;
+  for (final path in searchPaths) {
+    final searchPath = p.join(path, editor.application);
+    if (Directory(searchPath).existsSync()) {
+      applicationPath = searchPath;
+      break;
+    }
+  }
+
+  final result = Process.runSync(
+    'open',
+    [
+      projectEntity.path,
+      '-a',
+      applicationPath ?? editor.application,
+    ],
+  );
 
   final resultStdout = result.stdout;
   final resultStderr = result.stderr;
@@ -145,13 +164,13 @@ enum Editor {
   String get application {
     switch (this) {
       case Editor.as:
-        return 'Android Studio';
+        return 'Android Studio.app';
       case Editor.asp:
-        return 'Android Studio Preview';
+        return 'Android Studio Preview.app';
       case Editor.xc:
-        return 'Xcode';
+        return 'Xcode.app';
       case Editor.xcb:
-        return 'Xcode-beta';
+        return 'Xcode-beta.app';
     }
   }
 }
