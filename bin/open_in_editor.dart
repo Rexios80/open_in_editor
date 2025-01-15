@@ -18,8 +18,9 @@ Supported editors:
 
 Path is the path to the flutter project folder. If path is not provided, the current directory will be used.''';
 
-const searchPaths = [
-  '~/Applications',
+final home = Platform.environment['HOME']!;
+final searchPaths = [
+  p.join(home, 'Applications'),
 ];
 
 final magentaPen = AnsiPen()..magenta();
