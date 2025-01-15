@@ -8,10 +8,11 @@ environment:
 
 dependencies:
   ansicolor: ^2.0.1
+  path: ^1.9.1
   pub_update_checker: ^1.2.0
 
 dev_dependencies:
-  rexios_lints: ^6.0.1
+  rexios_lints: ^9.3.0
 
 executables:
   oie: open_in_editor

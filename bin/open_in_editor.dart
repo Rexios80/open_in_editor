@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
+import 'package:path/path.dart' as p;
 
 const decoder = Utf8Decoder();
 const help = '''
@@ -53,8 +54,9 @@ void main(List<String> arguments) async {
 
   final pathArg = arguments.length > 1 ? arguments[1] : '.';
   // Plugin projects should have a flutter project in the example folder
-  final path =
-      Directory('$pathArg/example').existsSync() ? '$pathArg/example' : pathArg;
+  final path = Directory(p.join(pathArg, 'example')).existsSync()
+      ? '$pathArg/example'
+      : pathArg;
 
   final projectError = redPen(
     '${editor.projectType} project not found in path: $path\nFlutter plugin projects must contain a valid example project',
@@ -66,15 +68,15 @@ void main(List<String> arguments) async {
     case ProjectType.android:
       // Plugin project root/android/app does not exist
       // This will happen if a valid example project does not exist
-      if (!Directory('$path/android/app').existsSync()) {
+      if (!Directory(p.join(path, 'android', 'app')).existsSync()) {
         print(projectError);
         exit(1);
       }
-      projectEntity = File('$path/android/build.gradle');
+      projectEntity = File(p.join(path, 'android', 'build.gradle'));
     case ProjectType.apple:
       final subpathOptions = [
-        if (Directory('$path/ios').existsSync()) 'iOS',
-        if (Directory('$path/macos').existsSync()) 'macOS',
+        if (Directory(p.join(path, 'ios')).existsSync()) 'iOS',
+        if (Directory(p.join(path, 'macos')).existsSync()) 'macOS',
       ];
 
       final String subpath;
@@ -94,7 +96,7 @@ void main(List<String> arguments) async {
       }
 
       projectEntity =
-          Directory('$path/${subpath.toLowerCase()}/Runner.xcworkspace');
+          Directory(p.join(path, subpath.toLowerCase(), 'Runner.xcworkspace'));
   }
   if (!projectEntity.existsSync()) {
     print(projectError);
