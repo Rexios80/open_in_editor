@@ -77,7 +77,13 @@ void main(List<String> arguments) async {
         print(projectError);
         exit(1);
       }
-      projectEntity = File(p.join(path, 'android', 'build.gradle'));
+      final buildGradle = File(p.join(path, 'android', 'build.gradle'));
+      final buildGradleKts = File(p.join(path, 'android', 'build.gradle.kts'));
+      if (buildGradle.existsSync()) {
+        projectEntity = buildGradle;
+      } else {
+        projectEntity = buildGradleKts;
+      }
     case ProjectType.apple:
       final subpathOptions = [
         if (Directory(p.join(path, 'ios')).existsSync()) 'iOS',

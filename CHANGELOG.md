@@ -1,3 +1,7 @@
+## 0.1.3
+
+- Supports Android `build.gradle.kts`
+
 ## 0.1.2
 
 - Prioritizes applications in `~/Applications`
